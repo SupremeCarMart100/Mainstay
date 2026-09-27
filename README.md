@@ -332,3 +332,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 <!-- handsoff-issue-1263 -->
 - #1263: Security: training records in engineer registry have no expiry — stale certifications remain valid indefinitely
+
+<!-- handsoff-issue-1228 -->
+- #1228: Fix: slash_bps from Config struct is never read — SLASH_BPS constant is used instead
