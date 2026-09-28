@@ -180,7 +180,7 @@ All Lending Contract keys are stored in **persistent** storage. There is no inst
 | `(Symbol("VOUCHES"), borrower: Address)` | ✅ Yes | `vouch`, `unvouch`, loan closure | `Vec<Vouch>` — all active voucher stakes for a borrower |
 | `(Symbol("V_HIST"), voucher: Address)` | ✅ Yes | `vouch` and every voucher settlement | `VoucherHistory` — running yield and slash totals |
 | `(Symbol("DEF_TIME"), borrower: Address)` | ✅ Yes | `auto_slash` / `slash` | Timestamp when the borrower's loan was defaulted |
-| `(DataKey::Liens, asset_id: u64)` | ✅ Yes | `record_lien`, `release_lien` | `Vec<LienRecord>` — active lien claims on an asset |
+| `DataKey::Liens(asset_id)` | ✅ Yes | `record_lien`, `release_lien`, and automatic lien release | `Vec<LienRecord>` — active lien claims on an asset; TTL is extended after every write and the key is removed when its final lien is released |
 | `Symbol("L_COUNT")` | ❌ **No TTL extension** | `request_loan` | Monotonic loan ID counter. Written on every loan request but never TTL-extended. See [follow-up issues](#follow-up-issues). |
 | `(Symbol("L_MAP"), loan_id: u64)` | ❌ **No TTL extension** | `request_loan` | Loan ID → borrower address lookup map. Written on every loan request but never TTL-extended. See [follow-up issues](#follow-up-issues). |
 
