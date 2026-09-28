@@ -394,9 +394,7 @@ fn release_lien_internal(env: &Env, asset_id: u64, loan_id: u64) {
             env.storage().persistent().remove(&key);
         } else {
             env.storage().persistent().set(&key, &liens);
-            env.storage()
-                .persistent()
-                .extend_ttl(&key, TTL_THRESHOLD, TTL_TARGET);
+            extend_persistent_ttl(env, &key);
         }
     }
 
@@ -1204,9 +1202,7 @@ impl LendingContract {
             amount,
         });
         env.storage().persistent().set(&key, &liens);
-        env.storage()
-            .persistent()
-            .extend_ttl(&key, TTL_THRESHOLD, TTL_TARGET);
+        extend_persistent_ttl(&env, &key);
 
         // #995: Write loan→asset_id mapping so slash can release the lien.
         let la_key = loan_asset_key(loan_id);
@@ -1251,9 +1247,7 @@ impl LendingContract {
                     env.storage().persistent().remove(&key);
                 } else {
                     env.storage().persistent().set(&key, &liens);
-                    env.storage()
-                        .persistent()
-                        .extend_ttl(&key, TTL_THRESHOLD, TTL_TARGET);
+                    extend_persistent_ttl(&env, &key);
                 }
             }
             None => panic_with_error!(&env, ContractError::LienNotFound),
@@ -1581,7 +1575,7 @@ impl LendingContract {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use soroban_sdk::testutils::{Address as _, Events};
+    use soroban_sdk::testutils::{Address as _, Events, Ledger};
 
     #[test]
     fn test_is_initialized() {
@@ -2071,6 +2065,36 @@ mod tests {
         assert_eq!(liens.get(0).unwrap().lender, lender);
         assert_eq!(liens.get(0).unwrap().loan_id, 42);
         assert_eq!(liens.get(0).unwrap().amount, 1000);
+    }
+
+    #[test]
+    fn test_lien_ttl_extended_on_creation_and_update() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let (contract_id, admin, _) = setup_contract(&env);
+        let client = LendingContractClient::new(&env, &contract_id);
+        let asset_id = 1u64;
+        let key = liens_key(asset_id);
+        let lender1 = Address::generate(&env);
+
+        client.record_lien(&admin, &asset_id, &lender1, &42, &1000);
+
+        let creation_ttl = env.as_contract(&contract_id, || {
+            env.storage().persistent().get_ttl(&key)
+        });
+        assert!(creation_ttl >= TTL_TARGET, "lien TTL must be extended on creation");
+
+        env.ledger().with_mut(|ledger| {
+            ledger.sequence_number += TTL_TARGET - TTL_THRESHOLD + 1;
+        });
+        let lender2 = Address::generate(&env);
+        client.record_lien(&admin, &asset_id, &lender2, &43, &2000);
+
+        let update_ttl = env.as_contract(&contract_id, || {
+            env.storage().persistent().get_ttl(&key)
+        });
+        assert!(update_ttl >= TTL_TARGET, "lien TTL must be extended on update");
     }
 
     #[test]
