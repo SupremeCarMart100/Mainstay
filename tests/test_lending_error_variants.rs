@@ -16,6 +16,53 @@
 
 use lending::{ContractError, SharedError};
 
+const fn assert_unique_discriminants(discriminants: &[u32]) {
+    let mut first = 0;
+    while first < discriminants.len() {
+        let mut second = first + 1;
+        while second < discriminants.len() {
+            if discriminants[first] == discriminants[second] {
+                panic!("lending error discriminants must be unique");
+            }
+            second += 1;
+        }
+        first += 1;
+    }
+}
+
+const _: () = assert_unique_discriminants(&[
+    ContractError::LoanAlreadyActive as u32,
+    ContractError::NoActiveLoan as u32,
+    ContractError::DuplicateVouch as u32,
+    ContractError::ZeroStake as u32,
+    ContractError::NotInitialized as u32,
+    ContractError::AlreadyInitialized as u32,
+    ContractError::UnauthorizedAdmin as u32,
+    ContractError::InsufficientFunds as u32,
+    ContractError::StakeBelowMinimum as u32,
+    ContractError::StakeSummationOverflow as u32,
+    ContractError::InvalidAdminAddress as u32,
+    ContractError::InvalidTokenAddress as u32,
+    ContractError::ContractPaused as u32,
+    ContractError::TooManyVouchers as u32,
+    ContractError::VouchWithdrawNotAllowed as u32,
+    ContractError::UnauthorizedBorrower as u32,
+    ContractError::LienAlreadyExists as u32,
+    ContractError::LienNotFound as u32,
+    ContractError::TimelockNotExpired as u32,
+    ContractError::ProposalNotFound as u32,
+    ContractError::CollateralIneligible as u32,
+    ContractError::LtvExceeded as u32,
+    ContractError::OracleNotConfigured as u32,
+    ContractError::RestructureNotFound as u32,
+    ContractError::RestructureLimitExceeded as u32,
+    ContractError::SyndicateNotFound as u32,
+    ContractError::UnauthorizedLender as u32,
+    ContractError::NotSyndicateLender as u32,
+    ContractError::InsuranceNotFound as u32,
+    ContractError::InsuranceVerificationFailed as u32,
+]);
+
 /// Verify the new variants are distinct and have the expected discriminants.
 #[test]
 fn test_timelock_not_expired_variant_exists_with_correct_discriminant() {
@@ -23,6 +70,8 @@ fn test_timelock_not_expired_variant_exists_with_correct_discriminant() {
     // change.  #993 assigns 19 to TimelockNotExpired and 20 to ProposalNotFound.
     assert_eq!(ContractError::TimelockNotExpired as u32, 19);
     assert_eq!(ContractError::ProposalNotFound as u32, 20);
+    assert_eq!(ContractError::CollateralIneligible as u32, 21);
+    assert_eq!(ContractError::LtvExceeded as u32, 22);
 }
 
 #[test]

@@ -221,10 +221,22 @@ This document lists every `ContractError` variant across the three core contract
 | 14 | `TooManyVouchers` | The borrower's loan already has 100 vouchers (the DoS protection cap). |
 | 15 | `VouchWithdrawNotAllowed` | The voucher attempted to withdraw their stake while an active loan is in progress. |
 | 16 | `UnauthorizedBorrower` | The caller is not the authorized borrower for this loan. |
+| 17 | `LienAlreadyExists` | A lien with the same asset, lender, and loan ID already exists. |
+| 18 | `LienNotFound` | No lien matches the given asset, lender, and loan ID. |
+| 19 | `TimelockNotExpired` | A timelocked operation was attempted before the required delay elapsed. |
+| 20 | `ProposalNotFound` | No pending admin-transfer proposal exists for the given address. |
+| 21 | `CollateralIneligible` | The asset does not meet the requirements for collateral. |
+| 22 | `LtvExceeded` | The requested loan amount exceeds the maximum allowed by the LTV ratio. |
+| 23 | `OracleNotConfigured` | No market conditions oracle is configured. |
+| 24 | `RestructureNotFound` | No matching loan restructuring request exists. |
+| 25 | `RestructureLimitExceeded` | The borrower has reached the restructuring limit. |
+| 26 | `SyndicateNotFound` | No matching loan syndicate exists. |
+| 27 | `UnauthorizedLender` | The caller is not authorized as a lender. |
+| 28 | `NotSyndicateLender` | The caller is not a lender in this syndicate. |
+| 29 | `InsuranceNotFound` | No insurance record exists for the asset. |
+| 30 | `InsuranceVerificationFailed` | The insurance policy could not be verified. |
 
-### Known bugs
-
-- `record_lien` and `release_lien` in `contracts/lending/src/lib.rs` panic with `ContractError::LienAlreadyExists` and `ContractError::LienNotFound` respectively, but neither variant is defined in the `ContractError` enum above. This is a pre-existing latent bug (undefined-variant reference, not a duplicate discriminant) that will surface as a compile error the first time those code paths are exercised in a build. Tracked for a follow-up fix.
+The lending error codes are unique. In particular, `TimelockNotExpired` and `ProposalNotFound` retain codes 19 and 20, while `CollateralIneligible` and `LtvExceeded` use 21 and 22.
 
 ### Resolution guidance
 
@@ -246,6 +258,20 @@ This document lists every `ContractError` variant across the three core contract
 | `TooManyVouchers` | A single loan accepts at most 100 vouchers. Split the vouching pool across multiple borrowers or reduce the voucher count. |
 | `VouchWithdrawNotAllowed` | Vouchers can only withdraw their stake when no active loan exists for the borrower. Wait for the loan to be repaid or defaulted. |
 | `UnauthorizedBorrower` | Only the borrower on record for the loan may call loan-mutating functions (e.g. `repay`). |
+| `LienAlreadyExists` | Use a different lender or loan ID, or release the existing lien before recording another. |
+| `LienNotFound` | Check the asset, lender, and loan ID against `get_liens(asset_id)` before releasing. |
+| `TimelockNotExpired` | Wait for the configured timelock delay before executing the operation. |
+| `ProposalNotFound` | Create a pending admin proposal before attempting to accept or execute it. |
+| `CollateralIneligible` | Use an eligible asset and confirm its lifecycle and collateral status before requesting the loan. |
+| `LtvExceeded` | Reduce the requested amount or provide more eligible collateral within the configured LTV limit. |
+| `OracleNotConfigured` | Ask the admin to configure the market conditions oracle. |
+| `RestructureNotFound` | Confirm the loan has an active restructuring request. |
+| `RestructureLimitExceeded` | Wait until an eligible restructuring is available or use another supported repayment option. |
+| `SyndicateNotFound` | Confirm the syndicate exists for the requested loan ID. |
+| `UnauthorizedLender` | Call the operation using an authorized lender account. |
+| `NotSyndicateLender` | Join the syndicate as a lender before submitting a lender-only action. |
+| `InsuranceNotFound` | Register insurance for the asset before attempting to claim against it. |
+| `InsuranceVerificationFailed` | Verify the policy details with the insurer and retry with valid coverage information. |
 
 ---
 

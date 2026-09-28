@@ -333,5 +333,5 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 <!-- handsoff-issue-1263 -->
 - #1263: Security: training records in engineer registry have no expiry — stale certifications remain valid indefinitely
 
-<!-- handsoff-issue-1226 -->
-- #1226: Fix: Liquidation struct is defined in lending contract but no liquidation function exists
+<!-- handsoff-issue-1229 -->
+- #1229: Fix: yield_bps from Config struct is never read — DEFAULT_YIELD_NUMERATOR constant is used instead
