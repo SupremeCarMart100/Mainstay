@@ -335,3 +335,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 <!-- handsoff-issue-1229 -->
 - #1229: Fix: yield_bps from Config struct is never read — DEFAULT_YIELD_NUMERATOR constant is used instead
+
+<!-- handsoff-issue-1227 -->
+- #1227: Fix: loan deadline is stored but auto_slash is not implemented in lending contract
