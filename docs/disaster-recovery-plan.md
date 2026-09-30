@@ -301,6 +301,10 @@ Use this checklist when responding to any Mainstay incident:
 
 ## Emergency Contacts
 
+> **Operator action required:** The addresses below are examples, not verified
+> production contacts. Replace them with monitored contacts or the on-call
+> directory and test every notification route before production operations.
+
 | Role | Contact | Availability |
 |------|---------|-------------|
 | Contract Admin | [admin@example.com](mailto:admin@example.com) | 24/7 |
